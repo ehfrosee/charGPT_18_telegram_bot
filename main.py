@@ -4,8 +4,11 @@ import openai
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+#uvicorn main:app --port 5000
+
 # инициализация индексной базы
-chunk = Chunk(path_to_base="Simble.txt")
+data_url = 'https://docs.google.com/document/d/11MU3SnVbwL_rM-5fIC14Lc3XnbAV4rY1Zd_kpcMuH4Y'
+chunk = Chunk(path_to_base=data_url)
 
 # класс с типами данных параметров 
 class Item(BaseModel): 

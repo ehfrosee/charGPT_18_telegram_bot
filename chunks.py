@@ -38,8 +38,8 @@ class Chunk():
     def __init__(self, path_to_base: str, sep: str = " ", ch_size: int = 1024, ch_overlap: int = 128):
 
         # загружаем базу
-        with open(path_to_base, 'r', encoding='utf-8') as file:
-            document = file.read()
+        # with open(path_to_base, 'r', encoding='utf-8') as file:
+        #     document = file.read()
         data_from_url = self.load_document_text(path_to_base)
         # создаем список чанков
         source_chunks = []
@@ -47,7 +47,7 @@ class Chunk():
         # for chunk in splitter.split_text(document):
         #     source_chunks.append(Document(page_content=chunk, metadata={}))
 
-        splitter = RecursiveCharacterTextSplitter(separator=sep, chunk_size=ch_size, chunk_overlap=ch_overlap,
+        splitter = RecursiveCharacterTextSplitter(chunk_size=ch_size, chunk_overlap=ch_overlap,
                                                   length_function=len)  # заполните нужными значениями, проведите эксперименты
         for chunk in splitter.split_text(data_from_url):
             source_chunks.append(Document(page_content=chunk, metadata={}))
@@ -75,3 +75,4 @@ class Chunk():
                                                   temperature=0)
 
         return completion.choices[0].message.content
+
