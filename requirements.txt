@@ -1,0 +1,11 @@
+faiss-cpu
+langchain==0.0.271
+openai==0.27.4
+tiktoken
+python-dotenv~=1.0.1
+fastapi==0.90.1
+uvicorn
+pydantic~=1.10.19
+
+
+requests~=2.32.3
