@@ -1,11 +1,24 @@
-faiss-cpu
-langchain==0.0.271
-openai==0.27.4
-tiktoken
-python-dotenv~=1.0.1
-fastapi==0.90.1
+# Файл requirements.txt
+
+# Официальная библиотека для работы с OpenAI API
+openai==0.27.6
+
+# Библиотеки для работы с LangChain
+langchain==0.0.213
+
+# Для загрузки переменных окружения из .env файлов
+python-dotenv>=1.0.0
+
+# Для работы с HTTP запросами
+requests>=2.32.0
+
+# Для работы с регулярными выражениями
+regex>=2023.12.18
+
+# Для работы с векторными базами данных
+faiss-cpu==1.9.0.post1
+
+beautifulsoup4==4.12.3
+
 uvicorn
-pydantic~=1.10.19
-
-
-requests~=2.32.3
+fastapi
