@@ -21,7 +21,7 @@ default_system_url = 'https://docs.google.com/document/d/1mwdXqx50imzvtPPbp7l8BT
 
 
 class Chunk():
-
+    count = 0
     def load_document_text(self, url: str) -> str:
         # Extract the document ID from the URL
         # загружаем базу
@@ -58,6 +58,8 @@ class Chunk():
 #        print(f'создаем индексную базу из {len(source_chunks)} элементов')
         self.db = FAISS.from_documents(source_chunks, embeddings)
 
+        self.__count = 0
+
     def get_answer(self, system_url: str = default_system_url, query: str = None):
         '''Функция получения ответа от chatgpt
         '''
@@ -75,8 +77,13 @@ class Chunk():
         completion = openai.ChatCompletion.create(model="gpt-4o-mini",
                                                   messages=messages,
                                                   temperature=0)
-
+        self.__count += 1
         return completion.choices[0].message.content
+
+    @property
+    def count(self):
+        return self.__count
+
 
 
 if __name__ == "__main__":
@@ -85,3 +92,4 @@ if __name__ == "__main__":
     topic = "Как определяется сумма страховых выплат?"
     answer = chunk.get_answer(query=topic)
     print(answer)
+    print(chunk.count)

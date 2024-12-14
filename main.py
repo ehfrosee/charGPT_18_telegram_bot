@@ -23,10 +23,13 @@ app = FastAPI()
 def read_root():
     return {"message": "answer"}
 
+# функция, которая обрабатывает запрос по пути "/count"
+@app.get("/count")
+def count():
+    return {"message": chunk.count}
 
 # функция обработки post запроса + декоратор
 @app.post("/api/get_answer")
 def get_answer(question: Item):
-    pass
     answer = chunk.get_answer(query=question.text)
     return {"message": answer}
