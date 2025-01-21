@@ -52,3 +52,9 @@ def count():
 def get_answer(question: Item):
     answer = chunk.get_answer(query=question.text)
     return {"message": answer}
+
+# асинхронная функция обработки post запроса + декоратор
+@app.post("/api/get_answer_async")
+async def get_answer_async(question: Item):
+    answer = await chunk.async_get_answer(query=question.text)
+    return {"message": answer}

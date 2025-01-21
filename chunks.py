@@ -80,6 +80,25 @@ class Chunk():
         self.__count += 1
         return completion.choices[0].message.content
 
+    async def async_get_answer(self, system: str = default_system, query: str = None):
+        '''Асинхронная функция получения ответа от chatgpt
+        '''
+        # релевантные отрезки из базы
+        docs = self.db.similarity_search(query, k=4)
+        message_content = '\n'.join([f'{doc.page_content}' for doc in docs])
+        messages = [
+            {"role": "system", "content": system},
+            {"role": "user",
+             "content": f"Ответь на вопрос клиента. Не упоминай документ с информацией для ответа клиенту в ответе. Документ с информацией для ответа клиенту: {message_content}\n\nВопрос клиента: \n{query}"}
+        ]
+
+        # получение ответа от chatgpt
+        completion = await openai.ChatCompletion.acreate(model="gpt-4o-mini",
+                                                         messages=messages,
+                                                         temperature=0)
+
+        return completion.choices[0].message.content
+
     @property
     def count(self):
         return self.__count

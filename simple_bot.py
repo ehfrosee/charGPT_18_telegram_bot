@@ -57,6 +57,12 @@ async def data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text('Данные сгружены')
 
 
+# функция-обработчик команды /status
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await update.message.reply_text(f'Осталось запросов: {context.bot_data[update.message.from_user.id]}')
+
+
 # функция-обработчик текстовых сообщений
 async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -71,8 +77,7 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # уменьшаем количество доступных запросов на 1
         context.bot_data[update.message.from_user.id]-=1
-        await update.message.reply_text(f'Осталось запросов: {context.bot_data[update.message.from_user.id]}')
-    
+
     else:
 
         # сообщение если запросы исчерпаны
@@ -97,7 +102,7 @@ def main():
 
     # создаем приложение и передаем в него токен бота
 #    application = Application.builder().token(TOKEN).build()
-    application = ApplicationBuilder().token("YOUR_BOT_TOKEN").build()
+    application = ApplicationBuilder().token(TOKEN).build()
     print('Бот запущен...')
 
     # создаем job_queue 
@@ -108,6 +113,7 @@ def main():
     # добавление обработчиков
     application.add_handler(CommandHandler("start", start, block=True))
     application.add_handler(CommandHandler("data", data, block=True))
+    application.add_handler(CommandHandler("status", status, block=True))
     application.add_handler(MessageHandler(filters.TEXT, text, block=True))
 
     # запуск бота (нажать Ctrl+C для остановки)
