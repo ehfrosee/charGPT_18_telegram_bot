@@ -8,7 +8,6 @@ import requests
 import aiohttp
 import json
 
-
 # подгружаем переменные окружения
 load_dotenv()
 
@@ -35,73 +34,88 @@ async def get_answer_async(text):
             return await resp.json()
 
 
+def add_question(questions: list, question: str):
+    """Функция добавляет вопрос в конец списка, если список больше 5 элементов, то удаляется 1 элемент"""
+    questions.append(question)
+    if len(questions) > 5:
+        questions.pop(0)
+    return questions
+
+def history_string(questions: list):
+    questions_string = ""
+    for str in questions:
+        questions_string += str + "\n"
+    return questions_string
+
 # функция-обработчик команды /start 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     # при первом запуске бота добавляем этого пользователя в словарь
     if update.message.from_user.id not in context.bot_data.keys():
-        context.bot_data[update.message.from_user.id] = 1
-    
+        context.bot_data[update.message.from_user.id] = {'count': 1, 'history': [], 'content': ''}
+
     # возвращаем текстовое сообщение пользователю
     await update.message.reply_text('Задайте любой вопрос ChatGPT')
 
 
 # функция-обработчик команды /data 
 async def data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     # создаем json и сохраняем в него словарь context.bot_data
     with open('data.json', 'w') as fp:
         json.dump(context.bot_data, fp)
-    
+
     # возвращаем текстовое сообщение пользователю
     await update.message.reply_text('Данные сгружены')
 
 
 # функция-обработчик команды /status
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f'Осталось запросов: {context.bot_data[update.message.from_user.id]['count']}')
 
-    await update.message.reply_text(f'Осталось запросов: {context.bot_data[update.message.from_user.id]}')
+# функция-обработчик команды /history
+async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Функция выводит последние максимум 5 вопросов"""
 
+    await update.message.reply_text(f'Последние 5 вопросов :\n{history_string(context.bot_data[update.message.from_user.id]['history'])}')
 
 # функция-обработчик текстовых сообщений
 async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     # проверка доступных запросов пользователя
-    if context.bot_data[update.message.from_user.id] > 0:
+    if context.bot_data[update.message.from_user.id]['count'] > 0:
 
         # выполнение запроса в chatgpt
         first_message = await update.message.reply_text('Ваш запрос обрабатывается, пожалуйста подождите...')
-        # res = await get_answer(update.message.text)
+
+        #Сохранение вопроса в словарь
+        context.bot_data[update.message.from_user.id]['history'] = add_question(
+            context.bot_data[update.message.from_user.id]['history'], update.message.text)
+
         res = await get_answer_async(update.message.text)
-        await context.bot.edit_message_text(text=res['message'], chat_id=update.message.chat_id, message_id=first_message.message_id)
+        await context.bot.edit_message_text(text=res['message'], chat_id=update.message.chat_id,
+                                            message_id=first_message.message_id)
 
         # уменьшаем количество доступных запросов на 1
-        context.bot_data[update.message.from_user.id]-=1
-
+        context.bot_data[update.message.from_user.id]['count'] -= 1
     else:
-
         # сообщение если запросы исчерпаны
         await update.message.reply_text('Ваши запросы на сегодня исчерпаны')
 
 
 # функция, которая будет запускаться раз в сутки для обновления доступных запросов
 async def callback_daily(context: ContextTypes.DEFAULT_TYPE):
-
     # проверка базы пользователей
     if context.bot_data != {}:
 
         # проходим по всем пользователям в базе и обновляем их доступные запросы
         for key in context.bot_data:
-            context.bot_data[key] = 3
+            context.bot_data[key]['count'] = 3
         print('Запросы пользователей обновлены')
     else:
         print('Не найдено ни одного пользователя')
 
+
 def main():
-
-
     # создаем приложение и передаем в него токен бота
-#    application = Application.builder().token(TOKEN).build()
+    #    application = Application.builder().token(TOKEN).build()
     application = ApplicationBuilder().token(TOKEN).build()
     print('Бот запущен...')
 
@@ -109,11 +123,12 @@ def main():
     job_queue = application.job_queue
     job_queue.run_repeating(callback_daily, interval=60, first=10)
 
-    #job = context.job_queue.run_repeating(callback, interval=5)
+    # job = context.job_queue.run_repeating(callback, interval=5)
     # добавление обработчиков
     application.add_handler(CommandHandler("start", start, block=True))
     application.add_handler(CommandHandler("data", data, block=True))
     application.add_handler(CommandHandler("status", status, block=True))
+    application.add_handler(CommandHandler("history", history, block=True))
     application.add_handler(MessageHandler(filters.TEXT, text, block=True))
 
     # запуск бота (нажать Ctrl+C для остановки)
@@ -123,4 +138,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
