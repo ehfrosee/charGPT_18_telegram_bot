@@ -34,8 +34,19 @@ async def get_answer_async(text):
             return await resp.json()
 
 
+# функция для асинхронного общения с сhatgpt
+async def summarize_question(question, answer):
+
+    text = question + ' ' + (answer if answer else '')
+    payload = {"text": text}
+    async with aiohttp.ClientSession() as session:
+        async with session.post('http://127.0.0.1:5000/api/summarize_question_async', json=payload) as resp:
+            return await resp.json()
+
+
 def add_question(questions: list, question: str):
-    """Функция добавляет вопрос в конец списка, если список больше 5 элементов, то удаляется 1 элемент"""
+    """Функция добавляет обощённый вопрос и ответ в конец списка, если список больше 5 элементов, то удаляется 1 элемент"""
+
     questions.append(question)
     if len(questions) > 5:
         questions.pop(0)
@@ -75,7 +86,8 @@ async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def history(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Функция выводит последние максимум 5 вопросов"""
 
-    await update.message.reply_text(f'Последние 5 вопросов :\n{history_string(context.bot_data[update.message.from_user.id]['history'])}')
+    history_str = history_string(context.bot_data[update.message.from_user.id]['history'])
+    await update.message.reply_text(f'Контекст последних 5 вопросов :\n{history_str}')
 
 # функция-обработчик текстовых сообщений
 async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -85,14 +97,16 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # выполнение запроса в chatgpt
         first_message = await update.message.reply_text('Ваш запрос обрабатывается, пожалуйста подождите...')
 
-        #Сохранение вопроса в словарь
-        context.bot_data[update.message.from_user.id]['history'] = add_question(
-            context.bot_data[update.message.from_user.id]['history'], update.message.text)
-
         res = await get_answer_async(update.message.text)
         await context.bot.edit_message_text(text=res['message'], chat_id=update.message.chat_id,
                                             message_id=first_message.message_id)
 
+        #Сохранение вопроса и ответа в словарь
+
+        sum_question = await summarize_question(update.message.text, res['message'])
+
+        context.bot_data[update.message.from_user.id]['history'] = add_question(
+            context.bot_data[update.message.from_user.id]['history'], sum_question['message'])
         # уменьшаем количество доступных запросов на 1
         context.bot_data[update.message.from_user.id]['count'] -= 1
     else:

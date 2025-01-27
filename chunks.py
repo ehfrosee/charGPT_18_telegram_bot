@@ -99,6 +99,24 @@ class Chunk():
 
         return completion.choices[0].message.content
 
+    async def async_summarize_question(self, dialog):
+        """
+        Функция возвращает саммаризированный текст диалога.
+        """
+        messages = [
+            {"role": "system",
+             "content": "Ты - нейро-саммаризатор. Твоя задача - саммаризировать диалог, который тебе пришел. Если пользователь назвал свое имя, обязательно отрази его в саммаризированном диалоге"},
+            {"role": "user",
+             "content": "Саммаризируй следующий диалог консультанта и пользователя, тебе запрещено удалять из саммаризации имя пользователя: " + dialog}
+        ]
+
+        # получение ответа от chatgpt
+        completion = await openai.ChatCompletion.acreate(model="gpt-4o-mini",
+                                                         messages=messages,
+                                                         temperature=0)
+
+        return completion.choices[0].message.content
+
     @property
     def count(self):
         return self.__count

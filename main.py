@@ -58,3 +58,9 @@ def get_answer(question: Item):
 async def get_answer_async(question: Item):
     answer = await chunk.async_get_answer(query=question.text)
     return {"message": answer}
+
+# асинхронная функция обработки post запроса + декоратор
+@app.post("/api/summarize_question_async")
+async def summarize_question_async(question: Item):
+    answer = await chunk.async_summarize_question(dialog=question.text)
+    return {"message": answer}
