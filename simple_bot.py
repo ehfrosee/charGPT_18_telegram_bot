@@ -99,18 +99,13 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         history_str = history_string(context.bot_data[update.message.from_user.id]['history'])
         hh = history_str if history_str else None
-        print("history_str\n"+history_str)
-        print("hh\n"+hh)
         res = await get_answer_async(update.message.text, history_str)
         await context.bot.edit_message_text(text=res['message'], chat_id=update.message.chat_id,
                                             message_id=first_message.message_id)
 
         #Сохранение вопроса и ответа в словарь
 
-        print(f"update.message.text - {update.message.text}")
-        print(f"res['message'] - {res['message']}")
         sum_question = await summarize_question(update.message.text, res['message'])
-        print(f"sum_question - {sum_question}")
         context.bot_data[update.message.from_user.id]['history'] = add_question(
             context.bot_data[update.message.from_user.id]['history'], sum_question['message'])
         # уменьшаем количество доступных запросов на 1

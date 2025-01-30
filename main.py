@@ -57,7 +57,6 @@ def get_answer(question: Item):
 # асинхронная функция обработки post запроса + декоратор
 @app.post("/api/get_answer_async")
 async def get_answer_async(question: Item):
-    print(f"question.text - {question.text}\nquestion.history - {question.history}")
     history = question.history if question.history else None
     answer = await chunk.async_get_answer(query=question.text, history=question.history)
     return {"message": answer}
@@ -65,6 +64,5 @@ async def get_answer_async(question: Item):
 # асинхронная функция обработки post запроса + декоратор
 @app.post("/api/summarize_question_async")
 async def summarize_question_async(question: Item):
-    print(f"question.text - {question.text}\nquestion.history - {question.history}")
     answer = await chunk.async_summarize_question(dialog=question.text)
     return {"message": answer}

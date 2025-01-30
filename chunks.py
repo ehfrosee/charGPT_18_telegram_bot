@@ -60,7 +60,7 @@ class Chunk():
 
         self.__count = 0
 
-    def get_answer(self, system_url: str = default_system_url, query: str = None):
+    def get_answer(self, system_url: str = default_system_url, query: str = None, history: str = None):
         '''Функция получения ответа от chatgpt
         '''
         system = self.load_document_text(system_url)
