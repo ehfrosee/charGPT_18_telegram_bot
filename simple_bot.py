@@ -27,8 +27,8 @@ async def get_answer(text):
 
 
 # функция для асинхронного общения с сhatgpt
-async def get_answer_async(text):
-    payload = {"text": text}
+async def get_answer_async(text, history=None):
+    payload = {"text": text, "history": history}
     async with aiohttp.ClientSession() as session:
         async with session.post('http://127.0.0.1:5000/api/get_answer_async', json=payload) as resp:
             return await resp.json()
@@ -37,8 +37,8 @@ async def get_answer_async(text):
 # функция для асинхронного общения с сhatgpt
 async def summarize_question(question, answer):
 
-    text = question + ' ' + (answer if answer else '')
-    payload = {"text": text}
+    text = "question - {}\nanswer - {}".format(question, answer if answer else '')
+    payload = {"text": text, "history": " "}
     async with aiohttp.ClientSession() as session:
         async with session.post('http://127.0.0.1:5000/api/summarize_question_async', json=payload) as resp:
             return await resp.json()
@@ -62,7 +62,7 @@ def history_string(questions: list):
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # при первом запуске бота добавляем этого пользователя в словарь
     if update.message.from_user.id not in context.bot_data.keys():
-        context.bot_data[update.message.from_user.id] = {'count': 1, 'history': [], 'content': ''}
+        context.bot_data[update.message.from_user.id] = {'count': 1, 'history': [' '], 'content': ' '}
 
     # возвращаем текстовое сообщение пользователю
     await update.message.reply_text('Задайте любой вопрос ChatGPT')
@@ -97,14 +97,20 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # выполнение запроса в chatgpt
         first_message = await update.message.reply_text('Ваш запрос обрабатывается, пожалуйста подождите...')
 
-        res = await get_answer_async(update.message.text)
+        history_str = history_string(context.bot_data[update.message.from_user.id]['history'])
+        hh = history_str if history_str else None
+        print("history_str\n"+history_str)
+        print("hh\n"+hh)
+        res = await get_answer_async(update.message.text, history_str)
         await context.bot.edit_message_text(text=res['message'], chat_id=update.message.chat_id,
                                             message_id=first_message.message_id)
 
         #Сохранение вопроса и ответа в словарь
 
+        print(f"update.message.text - {update.message.text}")
+        print(f"res['message'] - {res['message']}")
         sum_question = await summarize_question(update.message.text, res['message'])
-
+        print(f"sum_question - {sum_question}")
         context.bot_data[update.message.from_user.id]['history'] = add_question(
             context.bot_data[update.message.from_user.id]['history'], sum_question['message'])
         # уменьшаем количество доступных запросов на 1

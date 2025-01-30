@@ -23,6 +23,7 @@ chunk = Chunk(path_to_base=data_url)
 # класс с типами данных параметров
 class Item(BaseModel):
     text: str
+    history: str
 
 
 # создаем объект приложения
@@ -56,11 +57,14 @@ def get_answer(question: Item):
 # асинхронная функция обработки post запроса + декоратор
 @app.post("/api/get_answer_async")
 async def get_answer_async(question: Item):
-    answer = await chunk.async_get_answer(query=question.text)
+    print(f"question.text - {question.text}\nquestion.history - {question.history}")
+    history = question.history if question.history else None
+    answer = await chunk.async_get_answer(query=question.text, history=question.history)
     return {"message": answer}
 
 # асинхронная функция обработки post запроса + декоратор
 @app.post("/api/summarize_question_async")
 async def summarize_question_async(question: Item):
+    print(f"question.text - {question.text}\nquestion.history - {question.history}")
     answer = await chunk.async_summarize_question(dialog=question.text)
     return {"message": answer}

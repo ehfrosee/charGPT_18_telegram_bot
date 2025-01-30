@@ -70,7 +70,7 @@ class Chunk():
         messages = [
             {"role": "system", "content": system},
             {"role": "user",
-             "content": f"Ответь на вопрос клиента. Не упоминай документ с информацией для ответа клиенту в ответе. Документ с информацией для ответа клиенту: {message_content}\n\nВопрос клиента: \n{query}"}
+             "content": f"Ответь на вопрос клиента. Не упоминай документ с информацией для ответа клиенту в ответе. Документ с информацией для ответа клиенту: {message_content}\n\nВопрос клиента: \n{query}\n\nКонтекст диалога:\n{history}"}
         ]
 
         # получение ответа от chatgpt
@@ -80,7 +80,7 @@ class Chunk():
         self.__count += 1
         return completion.choices[0].message.content
 
-    async def async_get_answer(self, system: str = default_system, query: str = None):
+    async def async_get_answer(self, system: str = default_system, query: str = None, history: str = None):
         '''Асинхронная функция получения ответа от chatgpt
         '''
         # релевантные отрезки из базы
@@ -89,7 +89,7 @@ class Chunk():
         messages = [
             {"role": "system", "content": system},
             {"role": "user",
-             "content": f"Ответь на вопрос клиента. Не упоминай документ с информацией для ответа клиенту в ответе. Документ с информацией для ответа клиенту: {message_content}\n\nВопрос клиента: \n{query}"}
+             "content": f"Ответь на вопрос клиента. Не упоминай документ с информацией для ответа клиенту в ответе. Документ с информацией для ответа клиенту: {message_content}\n\nВопрос клиента: \n{query}\n\nКонтекст диалога:\n{history}"}
         ]
 
         # получение ответа от chatgpt
