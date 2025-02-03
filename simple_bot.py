@@ -98,7 +98,6 @@ async def text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         first_message = await update.message.reply_text('Ваш запрос обрабатывается, пожалуйста подождите...')
 
         history_str = history_string(context.bot_data[update.message.from_user.id]['history'])
-        hh = history_str if history_str else None
         res = await get_answer_async(update.message.text, history_str)
         await context.bot.edit_message_text(text=res['message'], chat_id=update.message.chat_id,
                                             message_id=first_message.message_id)

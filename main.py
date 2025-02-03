@@ -57,7 +57,6 @@ def get_answer(question: Item):
 # асинхронная функция обработки post запроса + декоратор
 @app.post("/api/get_answer_async")
 async def get_answer_async(question: Item):
-    history = question.history if question.history else None
     answer = await chunk.async_get_answer(query=question.text, history=question.history)
     return {"message": answer}
 
